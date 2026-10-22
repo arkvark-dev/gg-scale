@@ -1,6 +1,6 @@
 module github.com/automoto/gg-scale/tools
 
-go 1.26.6
+go 1.26.10
 
 tool gotest.tools/gotestsum
 

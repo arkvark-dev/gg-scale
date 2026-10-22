@@ -555,18 +555,16 @@ func sendEvenPortAllocate(t *testing.T, turnAddr string, creds *relay.Credential
 	require.NoError(t, nonce.GetFrom(challenge))
 	var realm stun.Realm
 	require.NoError(t, realm.GetFrom(challenge))
-	integrity := stun.NewLongTermIntegrity(creds.Username, realm.String(), creds.Password)
 
-	return transactSTUN(t, conn, dst, stun.MustBuild(
-		stun.TransactionID,
-		stun.NewType(stun.MethodAllocate, stun.ClassRequest),
+	// EVEN-PORT must precede MESSAGE-INTEGRITY: RFC 8489 receivers drop
+	// attributes that follow it, which turns this into a plain Allocate.
+	return transactSTUN(t, conn, dst, authenticatedRequest(
+		stun.MethodAllocate,
+		creds,
+		realm,
+		nonce,
 		requestedUDPTransport{},
-		stun.NewUsername(creds.Username),
-		&realm,
-		&nonce,
-		&integrity,
 		reserveEvenPort{},
-		stun.Fingerprint,
 	))
 }
 
